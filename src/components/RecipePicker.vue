@@ -18,10 +18,11 @@
     <button @click="addNewRecipe = !addNewRecipe">Add A New Recipe</button>
 
     <div v-if="addNewRecipe">
-      <form @submit.prevent="check">
-        Recipe Name:<input v-model.lazy="newRecipe.recipeName">
-      <br>
-        Recipe Link:<input v-model.lazy="newRecipe.recipeLink">
+      <form>
+        Recipe Name:<input id="newRecipeName"><button @click.prevent="addRecipeName">Add</button>
+      </form>
+      <form>
+        Recipe Link:<input id="newRecipeLink"><button @click.prevent="addRecipeLink">Add</button>
       </form>
 
       <form>
@@ -36,12 +37,12 @@
     <div>
       <p>New Recipe</p>
       <hr>
-      <p>Recipe Name: {{ newRecipe.recipeName }}</p>
-      <p>Recipe Link: {{ newRecipe.recipeLink }}</p>
+      <p>Recipe Name: {{ recipeName }}</p>
+      <p>Recipe Link:<a :href=recipeLink value="https://">{{ recipeLink }}</a></p>
 
       <span style="vertical-align: top;">Recipe Ingredients:
         <ol style="display:inline-block; margin:0">
-          <li v-for="(ingredient, index) in newRecipe.recipeIngredients">{{ingredient}}<button @click="removeIngredient(index)">Remove</button></li>
+          <li v-for="(ingredient, index) in recipeIngredients">{{ingredient}}<button @click="removeIngredient(index)">Remove</button></li>
         </ol>
       </span>
 
@@ -49,11 +50,12 @@
 
       <span style="vertical-align: top;">Recipe Directions:
         <ol style="display:inline-block; margin:0">
-          <li v-for="(direction, index) in newRecipe.recipeDirections">{{direction}}<button @click="removeDirection(index)">Remove</button></li>
+          <li v-for="(direction, index) in recipeDirections">{{direction}}<button @click="removeDirection(index)">Remove</button></li>
         </ol>
       </span>
     </div>
-    <button @click="submitToRecipes">Add To Recipe List</button>
+    <button @click.prevent="submitToRecipes">Add To Recipe List</button>
+    <button @click.prevent="clearField">Clear Field</button>
   </div>
 </template>
 
@@ -68,6 +70,10 @@
         showIngredients: false,
         showDirections: false,
         addNewRecipe: false,
+        recipeName: "",
+        recipeLink: "",
+        recipeIngredients: [],
+        recipeDirections: [],
         newRecipe: {
           recipeName: '',
           recipeLink: '',
@@ -99,29 +105,52 @@
         this.chosenRecipe = randomMeal;
         this.wasClicked = true;
       },
-      check() {
-        console.log(this.newRecipe.recipeName)
-      },
       addToNewRecipeIngredient() {
         let ingredient = document.getElementById("newIngredients").value;
-        this.newRecipe.recipeIngredients.push(ingredient);
+        this.recipeIngredients.push(ingredient);
         document.getElementById("newIngredients").value = "";
       },
       addToNewRecipeDirection() {
         let direction = document.getElementById("newDirections").value;
-        this.newRecipe.recipeDirections.push(direction);
+        this.recipeDirections.push(direction);
         document.getElementById("newDirections").value = "";
       },
       removeIngredient(index) {
-        this.newRecipe.recipeIngredients.splice(index, 1);
+        this.recipeIngredients.splice(index, 1);
       },
       removeDirection(index) {
-        this.newRecipe.recipeDirections.splice(index, 1);
+        this.recipeDirections.splice(index, 1);
+      },
+      addRecipeName() {
+        let newRecipeName = document.getElementById("newRecipeName").value;
+        this.recipeName = newRecipeName;
+        document.getElementById('newRecipeName').value = "";
+      },
+      addRecipeLink() {
+        let newRecipeLink = document.getElementById("newRecipeLink").value;
+        if (newRecipeLink.includes('https://') || newRecipeLink.includes('http://')) {
+          this.recipeLink = newRecipeLink;
+        } else {
+          this.recipeLink = 'https://' + newRecipeLink;
+        }
+        document.getElementById('newRecipeLink').value = "";
       },
       submitToRecipes() {
-        this.recipes.push(this.newRecipe);
-
-        console.log(this.recipes)
+        this.recipes.push(
+          {
+            recipeName: this.recipeName,
+            recipeLink: this.recipeLink,
+            recipeIngredients: this.recipeIngredients,
+            recipeDirections: this.recipeDirections
+          }
+        );
+      },
+      clearField(e) {
+        this.recipeName = "";
+        this.recipeLink = "";
+        this.recipeIngredients = [];
+        this.recipeDirections = [];
+        e.preventDefault();
       }
     }
   }
